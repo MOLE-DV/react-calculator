@@ -5,7 +5,7 @@ const keypadSymbols = [
   "%",
   "+/-",
   "C",
-  "X",
+  "x",
   "9",
   "8",
   "7",
@@ -22,19 +22,6 @@ const keypadSymbols = [
   "0",
 ] as string[];
 
-enum actions {
-  none,
-  clear,
-  change_symbol,
-  percent,
-  divide,
-  multiply,
-  minus,
-  sum,
-  equals,
-  dot,
-}
-
 export const Calculator = () => {
   const handleClickParticleEffect = (e: React.MouseEvent<HTMLElement>) => {
     const particle = document.createElement("div");
@@ -47,51 +34,91 @@ export const Calculator = () => {
       particle.remove();
     }, 2000);
   };
-  const [displayData, setDisplayData] = useState({
+  const [display, setDisplay] = useState({
     preview: "",
     current: "",
   });
+
   const mathOperations = useRef({
-    prewiev: "",
+    preview: "",
     current: "",
   });
 
-  const action = actions.none;
+  const isNumeric = (str: string) => !isNaN(parseInt(str));
+  const calculate = (preview: string, current: string) => {
+    if (preview.includes("÷") && current == "0") return "Error";
+    return eval(preview.replace("x", "*").replace("÷", "/") + current);
+  };
+  const updateDisplay = () => setDisplay(mathOperations.current);
 
-  let replaceLast = false;
   const handleKeyClick = (e: React.MouseEvent<HTMLElement>) => {
     handleClickParticleEffect(e);
-    const keyIsNumber = !isNaN(parseInt(e.currentTarget.innerText));
-    const keyValue = e.currentTarget.innerText;
+    const keyIsNumber = isNumeric(e.currentTarget.innerText);
+    let keyValue = e.currentTarget.innerText;
+    let { current, preview } = mathOperations.current;
 
-    if (!keyIsNumber && mathOperations.current.current.length > 0) {
-      setMathOperations((prev) => {
-        console.log(prev);
-        return {
-          preview: `${prev.current} ${keyValue}`,
-          current: "0",
+    switch (keyValue) {
+      case "%":
+        return;
+      case "+/-":
+        mathOperations.current = {
+          preview,
+          current: isNumeric(current) ? eval(current + "*-1") : current,
         };
-      });
-      replaceLast = true;
-    } else {
-      setMathOperations((prev) => {
-        console.log(replaceLast);
-        return {
-          ...prev,
-          current:
-            prev.preview.length > 0 && replaceLast
-              ? keyValue
-              : prev.current + keyValue,
+        updateDisplay();
+        return;
+      case "C":
+        mathOperations.current = { preview: "", current: "" };
+        current = "";
+        preview = "";
+        updateDisplay();
+        return;
+      case "=":
+        mathOperations.current = {
+          preview: "",
+          current: calculate(preview, current),
         };
-      });
-      replaceLast = false;
+        updateDisplay();
+        return;
     }
+
+    if (
+      (current.length == 0 && !keyIsNumber) ||
+      (typeof current == "string" && current.includes("Error"))
+    )
+      return;
+
+    if (!keyIsNumber && keyValue != ".") {
+      mathOperations.current = {
+        preview: `${calculate(preview, current)} ${keyValue}`,
+        current: "0",
+      };
+    } else if (
+      keyValue == "." &&
+      current.length > 0 &&
+      !current.includes(".")
+    ) {
+      console.log("test");
+      mathOperations.current = {
+        preview,
+        current: current + keyValue,
+      };
+    } else if (keyValue != ".") {
+      mathOperations.current = {
+        ...mathOperations.current,
+        current:
+          current[0] == "0" && !current.includes(".")
+            ? keyValue
+            : current + keyValue,
+      };
+    }
+    updateDisplay();
   };
   return (
     <div className="calculator">
       <div className="display">
-        <div className="preview">{mathOperation.preview}</div>
-        <div className="current">{mathOperation.current}</div>
+        <div className="preview">{display.preview}</div>
+        <div className="current">{display.current}</div>
       </div>
       <div className="keypad">
         {keypadSymbols.map((symbol, i) => (
