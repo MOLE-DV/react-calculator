@@ -1,0 +1,72 @@
+*
+    box-sizing: border-box
+    margin: 0
+    font-family: 'Trueno',Arial, Helvetica, sans-serif
+
+
+@font-face 
+    font-family: 'Trueno'
+    src: url('../assets/fonts/trueno.otf')
+
+
+#root
+    display: flex
+    justify-content: center
+    align-items: center
+    height: 100vh
+    background: white
+    
+    .calculator
+        height: clamp(min(50rem, 100%), 80vh, 70rem)
+        width: clamp(min(30rem, 100%), 50vw, 30rem)
+        
+        box-shadow: 0 0 5rem .1rem rgba(0, 0, 0, 0.185)
+        border-radius: 2rem
+
+        display: grid
+        grid-template-rows: 30% 70%
+        overflow: hidden
+
+        .display
+            display: flex
+            flex-direction: column
+            align-items: flex-end
+            justify-content: center
+            padding-right: 1rem
+            white-space: nowrap
+            overflow: hidden
+            font-size: clamp(1rem, 2vw, 2rem)
+            
+            .preview
+                font-size: calc(clamp(1rem, 2vw, 2rem) / 2)
+                color: rgb(73, 73, 73)
+        .keypad
+            display: grid
+            grid-template-columns: repeat(4, 1fr)
+            direction: rtl
+            gap: .19rem
+
+            .key
+                border: none
+                outline: none
+                background: none
+                font-size: clamp(.5rem, 120%, 2rem)
+                
+                &:nth-last-child(3)
+                    border-bottom-right-radius: 2rem
+
+                &:focus-visible
+                    box-shadow: 0 0 .1rem 0rem rgba(0, 0, 0, 0.486)
+
+            .particle
+                @keyframes disappear
+                    0%
+                         box-shadow: 0 0 2.25rem 1.25rem rgb(116, 206, 255)
+                    100%
+                        box-shadow: 0 0 1rem 0rem rgb(116, 206, 255)
+                        opacity: 0
+                        scale: .5
+                position: absolute
+                animation: 2s forwards disappear
+               
+                    
