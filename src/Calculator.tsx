@@ -1,11 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const keypadSymbols = [
   "÷",
   "%",
   "+/-",
-  "C",
-  "x",
+  "c",
+  "X",
   "9",
   "8",
   "7",
@@ -23,6 +23,24 @@ const keypadSymbols = [
 ] as string[];
 
 export const Calculator = () => {
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      const allowedKeys = keypadSymbols.map((key) =>
+        key == "÷" ? "/" : key == "X" ? "*" : key
+      );
+      if (e.key == "Enter") {
+        calculatorHandler("=");
+      }
+      if (allowedKeys.includes(e.key)) {
+        calculatorHandler(e.key);
+      }
+    };
+
+    window.addEventListener("keypress", handleKeyPress);
+
+    // return window.removeEventListener("keypress", handleKeyPress);
+  }, []);
+
   const handleClickParticleEffect = (e: React.MouseEvent<HTMLElement>) => {
     const particle = document.createElement("div");
     particle.className = "particle";
@@ -51,10 +69,8 @@ export const Calculator = () => {
   };
   const updateDisplay = () => setDisplay(mathOperations.current);
 
-  const handleKeyClick = (e: React.MouseEvent<HTMLElement>) => {
-    handleClickParticleEffect(e);
-    const keyIsNumber = isNumeric(e.currentTarget.innerText);
-    let keyValue = e.currentTarget.innerText;
+  const calculatorHandler = (keyValue: string) => {
+    const keyIsNumber = isNumeric(keyValue);
     let { current, preview } = mathOperations.current;
 
     switch (keyValue) {
@@ -67,7 +83,7 @@ export const Calculator = () => {
         };
         updateDisplay();
         return;
-      case "C":
+      case "c":
         mathOperations.current = { preview: "", current: "" };
         current = "";
         preview = "";
@@ -113,6 +129,11 @@ export const Calculator = () => {
       };
     }
     updateDisplay();
+  };
+
+  const handleKeyClick = (e: React.MouseEvent<HTMLElement>) => {
+    handleClickParticleEffect(e);
+    calculatorHandler(e.currentTarget.innerText);
   };
   return (
     <div className="calculator">
