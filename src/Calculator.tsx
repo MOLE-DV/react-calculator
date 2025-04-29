@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 
 const keypadSymbols = [
-  "÷",
+  "/",
   "%",
   "+/-",
   "c",
-  "X",
+  "*",
   "9",
   "8",
   "7",
@@ -25,20 +25,16 @@ const keypadSymbols = [
 export const Calculator = () => {
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      const allowedKeys = keypadSymbols.map((key) =>
-        key == "÷" ? "/" : key == "X" ? "*" : key
-      );
+      console.log(e.key, keypadSymbols, keypadSymbols.includes(e.key));
       if (e.key == "Enter") {
         calculatorHandler("=");
       }
-      if (allowedKeys.includes(e.key)) {
+      if (keypadSymbols.includes(e.key)) {
         calculatorHandler(e.key);
       }
     };
 
     window.addEventListener("keypress", handleKeyPress);
-
-    // return window.removeEventListener("keypress", handleKeyPress);
   }, []);
 
   const handleClickParticleEffect = (e: React.MouseEvent<HTMLElement>) => {
@@ -64,62 +60,30 @@ export const Calculator = () => {
 
   const isNumeric = (str: string) => !isNaN(parseInt(str));
   const calculate = (preview: string, current: string) => {
-    if (preview.includes("÷") && current == "0") return "Error";
-    return eval(preview.replace("x", "*").replace("÷", "/") + current);
+    if (preview.includes("/") && current == "0") return "Error";
+    return eval(preview + current);
   };
+
   const updateDisplay = () => setDisplay(mathOperations.current);
 
   const calculatorHandler = (keyValue: string) => {
     const keyIsNumber = isNumeric(keyValue);
     let { current, preview } = mathOperations.current;
 
-    switch (keyValue) {
-      case "%":
-        return;
-      case "+/-":
-        mathOperations.current = {
-          preview,
-          current: isNumeric(current) ? eval(current + "*-1") : current,
-        };
-        updateDisplay();
-        return;
-      case "c":
-        mathOperations.current = { preview: "", current: "" };
-        current = "";
-        preview = "";
-        updateDisplay();
-        return;
-      case "=":
-        mathOperations.current = {
-          preview: "",
-          current: calculate(preview, current),
-        };
-        updateDisplay();
-        return;
+    if (
+      ((current.length == 0 && !keyIsNumber) ||
+        (typeof current == "string" &&
+          (current.includes("Error") || current.includes("Infinity"))) ||
+        (typeof preview == "string" &&
+          (preview.includes("Error") || preview.includes("Infinity")))) &&
+      keyValue != "c"
+    ) {
+      mathOperations.current = { preview: "", current: "Error" };
+      updateDisplay();
+      return;
     }
 
-    if (
-      (current.length == 0 && !keyIsNumber) ||
-      (typeof current == "string" && current.includes("Error"))
-    )
-      return;
-
-    if (!keyIsNumber && keyValue != ".") {
-      mathOperations.current = {
-        preview: `${calculate(preview, current)} ${keyValue}`,
-        current: "0",
-      };
-    } else if (
-      keyValue == "." &&
-      current.length > 0 &&
-      !current.includes(".")
-    ) {
-      console.log("test");
-      mathOperations.current = {
-        preview,
-        current: current + keyValue,
-      };
-    } else if (keyValue != ".") {
+    if (keyIsNumber) {
       mathOperations.current = {
         ...mathOperations.current,
         current:
@@ -128,23 +92,71 @@ export const Calculator = () => {
             : current + keyValue,
       };
     }
+    //handle special buttons
+    switch (keyValue) {
+      case "%":
+        return;
+      case "+/-":
+        mathOperations.current = {
+          preview,
+          current: isNumeric(current) ? eval(current + "*-1") : current,
+        };
+        break;
+      case "c":
+        mathOperations.current = { preview: "", current: "" };
+        current = "";
+        preview = "";
+        break;
+      case "=":
+        mathOperations.current = {
+          preview: "",
+          current: calculate(preview, current),
+        };
+        break;
+      case "/":
+      case "+":
+      case "-":
+      case "*":
+        mathOperations.current = {
+          preview: `${calculate(preview, current)} ${keyValue}`,
+          current: "0",
+        };
+        break;
+      case ".":
+        console.log(keyValue, preview, current);
+        mathOperations.current = {
+          preview,
+          current: !current.includes(".") ? current + keyValue : current,
+        };
+        break;
+    }
     updateDisplay();
   };
 
-  const handleKeyClick = (e: React.MouseEvent<HTMLElement>) => {
+  const handleKeyClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     handleClickParticleEffect(e);
-    calculatorHandler(e.currentTarget.innerText);
+    calculatorHandler(e.currentTarget.value);
   };
   return (
     <div className="calculator">
       <div className="display">
-        <div className="preview">{display.preview}</div>
+        <div className="preview">
+          {display.preview.replace("/", "÷").replace("*", "x")}
+        </div>
         <div className="current">{display.current}</div>
       </div>
       <div className="keypad">
         {keypadSymbols.map((symbol, i) => (
-          <button className="key" key={i} onClick={handleKeyClick}>
-            {symbol}
+          <button
+            className="key"
+            key={i}
+            onClick={handleKeyClick}
+            value={symbol}
+          >
+            {(symbol != "+/-" ? symbol.replace("/", "÷") : symbol).replace(
+              "*",
+              "x"
+            )}
           </button>
         ))}
       </div>

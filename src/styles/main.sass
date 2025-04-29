@@ -8,6 +8,14 @@
     font-family: 'Trueno'
     src: url('../assets/fonts/trueno.otf')
 
+@keyframes disappear
+    0%
+            box-shadow: 0 0 2.25rem 1.25rem rgb(116, 206, 255)
+    100%
+        box-shadow: 0 0 1rem 0rem rgb(116, 206, 255)
+        opacity: 0
+        scale: .5
+
 
 #root
     display: flex
@@ -59,14 +67,6 @@
                     box-shadow: 0 0 .1rem 0rem rgba(0, 0, 0, 0.486)
 
             .particle
-                @keyframes disappear
-                    0%
-                         box-shadow: 0 0 2.25rem 1.25rem rgb(116, 206, 255)
-                    100%
-                        box-shadow: 0 0 1rem 0rem rgb(116, 206, 255)
-                        opacity: 0
-                        scale: .5
                 position: absolute
-                animation: 2s forwards disappear
-               
+                animation: 2s forwards disappear               
                     
